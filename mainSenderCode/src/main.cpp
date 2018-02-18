@@ -54,25 +54,22 @@ void setup() {
 }
 
 void loop() {
-  // char radiopacket[20];
-  // char temp[5];
-  // String tempWord = "####";
-  // int x = ss.analogRead(2);
-  // int y = ss.analogRead(3);
 
-  // Serial.println("Sending to rf69_server");
-  // // Send a message to rf69_server
-  // uint8_t data[] = "12:25";
-  // rf69.send(data, sizeof(data));
-  //
-  // rf69.waitPacketSent();
-  // Serial.println("SENT!");
-  //
-  // delay(400);
-  //
-  // delay(10);
-  Serial.print("CHECK-1\n");
-  rad.send(rf69, "Jackattack");
-  Serial.print("CHECK7\n");
+  String d = "Jackattack";
+  int dlen = d.length();
+  char charra[dlen];
+
+  for(int i=0; i<dlen; i++)
+    charra[i] = d[i];
+
+  for(char c: charra)
+    Serial.println(c);
+
+  rf69.send((uint8_t*)charra, strlen(charra));
+  rf69.waitPacketSent();
+
+  // Serial.print("CHECK-1\n");
+  // rad.send(rf69, "Jackattack");
+  // Serial.print("CHECK7\n");
   delay(400);
 }
