@@ -101,6 +101,7 @@ void loop() {
   itoa(ycoord, temp, 10);
   d += ':';
   d += temp;
+  d += ':';
 
   Serial.println(d);
 

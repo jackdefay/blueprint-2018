@@ -13,8 +13,24 @@
 #define ULTRA_SEND  10
 #define ULTRA_REC   11
 
+#define rfpos A5
+#define rfneg A2
+#define rbpos A1
+#define rbneg 5
+#define lfpos 11
+#define lfneg 10
+#define lbpos 9
+#define lbneg 6
+
+#define pwmrf 13
+#define pwmrb 12
+#define pwmlf A3
+#define pwmlb A4
+
 String receive(RH_RF69 r, int timeOut);
 String ultra();
+void setDirection(char motor, bool direction);
+int clip(int num);
 
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
 
@@ -36,6 +52,22 @@ void setup() {
   pinMode(ULTRA_SEND, OUTPUT);
   pinMode(ULTRA_REC, LOW);
 
+  pinMode(rfpos, OUTPUT);
+  pinMode(rfneg, OUTPUT);
+  pinMode(rbpos, OUTPUT);
+  pinMode(rbneg, OUTPUT);
+  pinMode(lfpos, OUTPUT);
+  pinMode(lfneg, OUTPUT);
+  pinMode(lbpos, OUTPUT);
+  pinMode(lbneg, OUTPUT);
+  pinMode(pwmrf, OUTPUT);
+  pinMode(pwmrb, OUTPUT);
+  pinMode(pwmlf, OUTPUT);
+  pinMode(pwmlb, OUTPUT);
+
+  setDirection('r', true);
+  setDirection('l', true);
+
   if (!rf69.init())
     Serial.println("ERROR: init failed");
 
@@ -51,15 +83,14 @@ void loop() {
   uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
   uint8_t len = sizeof(buf);
 
-String SSS = "";
+String coords = "";
 
   if (rf69.waitAvailableTimeout(500)) {
     if (rf69.recv(buf, &len)) {
       char* temp = (char*)buf;
       String tempS(temp);
-      tempS = '='+tempS;
       Serial.println(tempS);
-      SSS = tempS;
+      coords = tempS;
     } else {
       Serial.println("@");
     }
@@ -67,19 +98,43 @@ String SSS = "";
     Serial.println("!");
   }
   delay(100);
+//-32:23:
 
-  if(SSS != "@" && SSS != "!") {
-    
+  // coords = "-32:23:";
+
+  String pwml="", pwmr="";
+
+  int nextStart = 0;
+  if(coords != "@" && coords != "!") {
+    for(int i=0; i<coords.length(); i++) {
+      if(coords[i] != ':')
+        pwml += coords[i];
+      else {
+        nextStart = i+1;
+        break;
+      }
+    }
+    for(int i=nextStart; i<coords.length()-1; i++) {
+      pwmr += coords[i];
+    }
   }
 
+  Serial.println(pwml);
+  Serial.println(pwmr);
+
+  int pwmlint = pwml.toInt();
+  int pwmrint = pwmr.toInt();
+
+  Serial.println("1");
   String d = ultra();
+  Serial.println("2");
   int dlen = d.length();
   char charra[dlen];
   for(int i=0; i<dlen; i++)
     charra[i] = d[i];
   Serial.print("\nSending...");
   rf69.send((uint8_t*)charra, strlen(charra));
-  rf69.waitPacketSent();
+  // rf69.waitPacketSent();
   Serial.print("Sent: ''");
   Serial.print(d);
   Serial.print("''");
@@ -133,4 +188,45 @@ String ultra() {
   itoa(returnValue, tempx, 1);
   String ret = tempx;
   return ret;
+}
+
+void setDirection(char motor, bool direction){  //1 = forwards, 0 = backwards
+  Serial.println("In function setDirection");
+  if(motor == 'r'){
+    digitalWrite(rfpos, (int) direction);
+    digitalWrite(rfneg, (int) !direction);
+    digitalWrite(rbpos, (int) direction);
+    digitalWrite(rbneg, (int) !direction);
+  }
+  else if(motor == 'l'){                        //the left wheels are reversed
+    digitalWrite(lfpos, (int) !direction);
+    digitalWrite(lfneg, (int) direction);
+    digitalWrite(lbpos, (int) !direction);
+    digitalWrite(lbneg, (int) direction);
+  }
+}
+
+void setSpeed(int pwmr, int pwml){
+  if(pwmr>=0) setDirection('r', true);
+  else setDirection('r', false);
+
+  if(pwml>=0) setDirection('l', true);
+  else setDirection('l', false);
+
+  pwmr = clip(pwmr);
+  pwml = clip(pwml);
+
+  Serial.print("the values being written to the motors are: "); Serial.print(pwmr); Serial.print(", "); Serial.println(pwml);
+
+  analogWrite(pwmrf, pwmr);
+  analogWrite(pwmrb, pwmr);
+  analogWrite(pwmlf, pwml);
+  analogWrite(pwmlb, pwml);
+}
+
+int clip(int num){
+  if(num>=0 && num<=255) return num;
+  else if(num>=-255 && num<0) return -num;
+  else if(num>255 || num<-255) return 255;
+  else return 0;
 }
