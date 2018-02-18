@@ -32,6 +32,7 @@ void setup() {
   ss.setGPIOInterrupts(button_mask, 1);
   pinMode(IRQ_PIN, INPUT);
 
+  //radio
   pinMode(RFM69_RST, OUTPUT);
   digitalWrite(RFM69_RST, LOW);
 
@@ -54,7 +55,6 @@ void setup() {
 
 void loop() {
   String d = "Jackattack";
-
   int dlen = d.length();
   char charra[dlen];
   for(int i=0; i<dlen; i++)
@@ -65,8 +65,6 @@ void loop() {
   Serial.print("Sent: ''");
   Serial.print(d);
   Serial.print("''");
-
-  // send(rf69, "Test2okay");
   delay(400);
 }
 
