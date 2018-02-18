@@ -53,20 +53,20 @@ void setup() {
 }
 
 void loop() {
+  String d = "Jackattack";
 
-  // String d = "Jackattack";
-  // int dlen = d.length();
-  // char charra[dlen];
-  // for(int i=0; i<dlen; i++)
-  //   charra[i] = d[i];
-  // rf69.send((uint8_t*)charra, strlen(charra));
-  // rf69.waitPacketSent();
+  int dlen = d.length();
+  char charra[dlen];
+  for(int i=0; i<dlen; i++)
+    charra[i] = d[i];
+  Serial.print("\nSending...");
+  rf69.send((uint8_t*)charra, strlen(charra));
+  rf69.waitPacketSent();
+  Serial.print("Sent: ''");
+  Serial.print(d);
+  Serial.print("''");
 
-  send(rf69, "Test2okay");
-
-  // Serial.print("CHECK-1\n");
-  // send(rf69, "Jackattack");
-  // Serial.print("CHECK7\n");
+  // send(rf69, "Test2okay");
   delay(400);
 }
 
