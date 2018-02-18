@@ -22,7 +22,7 @@ uint32_t button_mask = (1 << BUTTON_RIGHT) | (1 << BUTTON_DOWN) | (1 << BUTTON_L
 #define IRQ_PIN   5
 
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
-Comm rad(rf69);
+Comm rad;
 
 void setup() {
   Serial.begin(115200);
@@ -32,6 +32,25 @@ void setup() {
   ss.pinModeBulk(button_mask, INPUT_PULLUP);
   ss.setGPIOInterrupts(button_mask, 1);
   pinMode(IRQ_PIN, INPUT);
+
+  pinMode(RFM69_RST, OUTPUT);
+  digitalWrite(RFM69_RST, LOW);
+
+  // manual reset
+  digitalWrite(RFM69_RST, HIGH);
+  delay(10);
+  digitalWrite(RFM69_RST, LOW);
+  delay(10);
+
+  if (!rf69.init())
+    Serial.println("ERROR: init failed");
+
+  if (!rf69.setFrequency(RF69_FREQUENCY))
+    Serial.println("ERROR: setFrequency failed");
+
+  uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+  rf69.setEncryptionKey(key);
 }
 
 void loop() {
@@ -52,7 +71,8 @@ void loop() {
   // delay(400);
   //
   // delay(10);
-
-  rad.receive(rf69, 500);
+  Serial.print("CHECK-1\n");
+  rad.send(rf69, "Jackattack");
+  Serial.print("CHECK7\n");
   delay(400);
 }
