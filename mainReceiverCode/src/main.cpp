@@ -2,16 +2,16 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <RH_RF69.h>
-#include <Comm.h>
 
 //defs for radio
-// #define RF69_FREQUENCY  900.0
-// #define RFM69_SLAVE     8
-// #define RFM69_INTERRUPT 3
-// #define RFM69_RST       4
+#define RF69_FREQUENCY  900.0
+#define RFM69_SLAVE     8
+#define RFM69_INTERRUPT 3
+#define RFM69_RST       4
+
+String receive(RH_RF69 r, int timeOut);
 
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
-Comm rad;
 
 void setup() {
   Serial.begin(115200);
@@ -38,25 +38,42 @@ void setup() {
 }
 
 void loop() {
-
-  uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
-  uint8_t len = sizeof(buf);
-
-  if (rf69.waitAvailableTimeout(500)) {
-    if (rf69.recv(buf, &len)) {
-      char* temp = (char*)buf;
-      String tempS(temp);
-      tempS = '='+tempS;
-      Serial.println(tempS);
-    } else {
-      Serial.println("@");
-    }
-  } else {
-    Serial.println("!");
-  }
+  // uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+  // uint8_t len = sizeof(buf);
+  // if (rf69.waitAvailableTimeout(500)) {
+  //   if (rf69.recv(buf, &len)) {
+  //     char* temp = (char*)buf;
+  //     String tempS(temp);
+  //     tempS = '='+tempS;
+  //     Serial.println(tempS);
+  //   } else {
+  //     Serial.println("@");
+  //   }
+  // } else {
+  //   Serial.println("!");
+  // }
 
   // String x = rad.receive(rf69, 500);
   // Serial.println(x);
+  String x = receive(rf69, 500);
+  Serial.print(x);
 
   delay(400);
+}
+
+String receive(RH_RF69 r, int timeOut) {
+  uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+  if (r.waitAvailableTimeout(timeOut)) {
+    if (r.recv(buf, &len)) {
+      char* temp = (char*)buf;
+      String tempS(temp);
+      tempS = '='+tempS;
+      return tempS;
+    } else {
+      return "@";
+    }
+  } else {
+    return "!";
+  }
 }
