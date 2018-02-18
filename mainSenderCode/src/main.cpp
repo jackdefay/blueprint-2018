@@ -2,6 +2,9 @@
 #include <Adafruit_seesaw.h>
 #include <SPI.h>
 #include <RH_RF69.h>
+// #include <string>
+
+#define JOYSTICK_RANGE 1023
 
 //defs for radio
 #define RF69_FREQUENCY  900.0
@@ -54,7 +57,53 @@ void setup() {
 }
 
 void loop() {
-  String d = "Jackattack";
+  int x = ss.analogRead(2);
+  int y = ss.analogRead(3);
+  int pwmr, pwml;
+  int xcoord = y;
+  int ycoord = x;
+
+  xcoord = xcoord - (JOYSTICK_RANGE/2);
+  ycoord = (JOYSTICK_RANGE/2) - ycoord;
+
+  //-509, 512
+  xcoord = xcoord;
+  pwmr = (int) 2*(ycoord * 255 /JOYSTICK_RANGE);  //***just going to code it to do turns for now, will add rotation functionality later***
+  pwml = pwmr;
+  Serial.print("the forward power to the motors before correction is: "); Serial.println(pwmr);
+  if(xcoord>-20 && xcoord<20 && ycoord>20 && ycoord<20){
+    pwmr=0;
+    pwml=0;
+  }
+  else if(xcoord > JOYSTICK_RANGE/2){
+    pwmr -= (int) (2*(xcoord * 255)/JOYSTICK_RANGE);
+    pwml += (int) (2*(xcoord * 255)/JOYSTICK_RANGE);
+  }
+  else if(xcoord < JOYSTICK_RANGE/2){
+    pwml -= (int) (-2*(xcoord * 255)/JOYSTICK_RANGE);
+    pwmr += (int) (-2*(xcoord * 255)/JOYSTICK_RANGE);
+  }
+
+  // Serial.print("pwml: ");
+  // Serial.println(pwml);
+  // Serial.print("pwmr: ");
+  // Serial.println(pwmr);
+
+  // String d = to_string(pwml)+':'+to_string(pwmr);
+
+  String d = "";
+  Serial.println(d);
+  char temp[5];
+
+  itoa(xcoord, temp, 10);
+  d += temp;
+
+  itoa(ycoord, temp, 10);
+  d += ':';
+  d += temp;
+
+  Serial.println(d);
+
   int dlen = d.length();
   char charra[dlen];
   for(int i=0; i<dlen; i++)

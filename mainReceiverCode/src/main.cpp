@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <RH_RF69.h>
-#include <string>
 
 //defs for radio
 #define RF69_FREQUENCY  900.0
@@ -15,6 +14,7 @@
 #define ULTRA_REC   11
 
 String receive(RH_RF69 r, int timeOut);
+String ultra();
 
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
 
@@ -50,12 +50,16 @@ void setup() {
 void loop() {
   uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
   uint8_t len = sizeof(buf);
+
+String SSS = "";
+
   if (rf69.waitAvailableTimeout(500)) {
     if (rf69.recv(buf, &len)) {
       char* temp = (char*)buf;
       String tempS(temp);
       tempS = '='+tempS;
       Serial.println(tempS);
+      SSS = tempS;
     } else {
       Serial.println("@");
     }
@@ -64,7 +68,11 @@ void loop() {
   }
   delay(100);
 
-  String d = "Jackattack";
+  if(SSS != "@" && SSS != "!") {
+    
+  }
+
+  String d = ultra();
   int dlen = d.length();
   char charra[dlen];
   for(int i=0; i<dlen; i++)
@@ -120,5 +128,9 @@ String ultra() {
   else if(distance > 895) returnValue = 1;
   else returnValue = 0;
   delay(100);
-  return to_string(returnValue)
+
+  char tempx[1];
+  itoa(returnValue, tempx, 1);
+  String ret = tempx;
+  return ret;
 }
