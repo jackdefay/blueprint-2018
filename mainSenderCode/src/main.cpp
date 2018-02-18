@@ -40,30 +40,31 @@ void loop()
 {
   Serial.println("Sending to rf69_server");
   // Send a message to rf69_server
-  uint8_t data[] = "Hello World!";
+  uint8_t data[] = "12:25";
   rf69.send(data, sizeof(data));
 
   rf69.waitPacketSent();
+  Serial.println("SENT!");
   // Now wait for a reply
-  uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
-  uint8_t len = sizeof(buf);
+  // uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+  // uint8_t len = sizeof(buf);
 
-  if (rf69.waitAvailableTimeout(500))
-  {
-    // Should be a reply message for us now
-    if (rf69.recv(buf, &len))
-    {
-      Serial.print("got reply: ");
-      Serial.println((char*)buf);
-    }
-    else
-    {
-      Serial.println("recv failed");
-    }
-  }
-  else
-  {
-    Serial.println("No reply, is rf69_server running?");
-  }
+  // if (rf69.waitAvailableTimeout(500))
+  // {
+  //   // Should be a reply message for us now
+  //   if (rf69.recv(buf, &len))
+  //   {
+  //     Serial.print("got reply: ");
+  //     Serial.println((char*)buf);
+  //   }
+  //   else
+  //   {
+  //     Serial.println("recv failed");
+  //   }
+  // }
+  // else
+  // {
+  //   Serial.println("No reply, is rf69_server running?");
+  // }
   delay(400);
 }
