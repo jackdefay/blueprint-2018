@@ -2,6 +2,8 @@
 #include <Adafruit_seesaw.h>
 #include <SPI.h>
 #include <RH_RF69.h>
+#include <Wire.h>
+#include "Adafruit_DRV2605.h"
 // #include <string>
 
 #define JOYSTICK_RANGE 1023
@@ -14,6 +16,7 @@
 
 //defs for controller
 Adafruit_seesaw ss;
+Adafruit_DRV2605 drv;
 #define BUTTON_RIGHT 6
 #define BUTTON_DOWN  7
 #define BUTTON_LEFT  9
@@ -54,9 +57,36 @@ void setup() {
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   rf69.setEncryptionKey(key);
+
+  drv.begin();
+  drv.selectLibrary(1);
+
+  drv.setMode(DRV2605_MODE_INTTRIG);
 }
 
 void loop() {
+  static int level;
+  static uint8_t effect;
+  String lvl = "";
+  uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+
+  if (rf69.waitAvailableTimeout(500)) {
+    if (rf69.recv(buf, &len)) {
+      char* temp = (char*)buf;
+      String tempS(temp);
+      Serial.println(tempS);
+      lvl = tempS;
+    } else {
+      Serial.println("@");
+    }
+  } else {
+    Serial.println("!");
+  }
+  delay(100);
+
+  level = lvl.toInt();
+
   int x = ss.analogRead(2);
   int y = ss.analogRead(3);
   int pwmr, pwml;
@@ -88,8 +118,23 @@ void loop() {
   // Serial.println(pwml);
   // Serial.print("pwmr: ");
   // Serial.println(pwmr);
+  if(level == 0)
+    effect = 0;
+  else if(level == 1)
+    effect = 51;
+  else if (level == 2)
+    effect = 50;
+  else if (level == 3)
+    effect = 49;
+  else if (level == 4)
+    effect = 48;
+  else if (level == 5)
+    effect = 47;
 
-  // String d = to_string(pwml)+':'+to_string(pwmr);
+  drv.setWaveform(0, effect);  // play effect
+  drv.setWaveform(1, 0);       // end waveform
+    // plays
+  drv.go();
 
   String d = "";
   Serial.println(d);
@@ -115,7 +160,7 @@ void loop() {
   Serial.print("Sent: ''");
   Serial.print(d);
   Serial.print("''");
-  delay(400);
+  delay(200);
 }
 
 void send(RH_RF69 r, String d) {

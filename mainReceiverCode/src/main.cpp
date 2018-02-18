@@ -10,8 +10,8 @@
 #define RFM69_RST       4
 
 //defs for ultra
-#define ULTRA_SEND  10
-#define ULTRA_REC   11
+#define ULTRA_SEND  16
+#define ULTRA_REC   15
 
 #define rfpos A5
 #define rfneg A2
@@ -31,6 +31,7 @@ String receive(RH_RF69 r, int timeOut);
 String ultra();
 void setDirection(char motor, bool direction);
 int clip(int num);
+void setSpeed(int pwmr, int pwml);
 
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
 
@@ -83,7 +84,7 @@ void loop() {
   uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
   uint8_t len = sizeof(buf);
 
-String coords = "";
+  String coords = "";
 
   if (rf69.waitAvailableTimeout(500)) {
     if (rf69.recv(buf, &len)) {
@@ -125,6 +126,8 @@ String coords = "";
   int pwmlint = pwml.toInt();
   int pwmrint = pwmr.toInt();
 
+  setSpeed(pwmrint, pwmlint);
+
   Serial.println("1");
   String d = ultra();
   Serial.println("2");
@@ -134,7 +137,7 @@ String coords = "";
     charra[i] = d[i];
   Serial.print("\nSending...");
   rf69.send((uint8_t*)charra, strlen(charra));
-  // rf69.waitPacketSent();
+  rf69.waitPacketSent();
   Serial.print("Sent: ''");
   Serial.print(d);
   Serial.print("''");
