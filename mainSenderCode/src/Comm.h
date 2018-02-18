@@ -22,19 +22,24 @@ class Comm {
           tempS = '='+tempS;
           return tempS;
         } else {
-          Serial.print("Gatit");
-          return "!";
+          return "@";
         }
       } else {
-        Serial.println("No reply, is rf69_server running?");
         return "!";
       }
     }
     void send(RH_RF69 r, String d) {
-      char charra[20];
-      d.toCharArray(charra, 20);
+      int dlen = d.length();
+      char charra[dlen];
+
+      for(int i=0; i<dlen; i++)
+        charra[i] = d[i];
+
+      for(char c: charra)
+        Serial.println(c);
+
       r.send((uint8_t*)charra, strlen(charra));
 
-      // r.waitPacketSent();
+      r.waitPacketSent();
     }
 };

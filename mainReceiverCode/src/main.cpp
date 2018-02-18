@@ -38,8 +38,25 @@ void setup() {
 }
 
 void loop() {
-  
-  String x = rad.receive(rf69, 500);
+
+  uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+
+  if (rf69.waitAvailableTimeout(500)) {
+    if (rf69.recv(buf, &len)) {
+      char* temp = (char*)buf;
+      String tempS(temp);
+      tempS = '='+tempS;
+      Serial.println(tempS);
+    } else {
+      Serial.println("@");
+    }
+  } else {
+    Serial.println("!");
+  }
+
+  // String x = rad.receive(rf69, 500);
+  // Serial.println(x);
 
   delay(400);
 }
