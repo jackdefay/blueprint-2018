@@ -99,7 +99,7 @@ String ultra() {
   unsigned long receiveTime;
   unsigned long timeBetween;
   unsigned long distance;
-  int returnValue;
+  String returnValue;
 
   sendTime = micros();
   digitalWrite(ULTRA_SEND, HIGH);
@@ -113,12 +113,12 @@ String ultra() {
   timeBetween = sendTime-receiveTime;
 
   distance = timeBetween*17/1000%1000;
-  if(distance > 940) returnValue = 5;
-  else if(distance > 930) returnValue = 4;
-  else if(distance > 920) returnValue = 3;
-  else if(distance > 905) returnValue = 2;
-  else if(distance > 895) returnValue = 1;
-  else returnValue = 0;
+  if(distance > 940) returnValue = "5";
+  else if(distance > 930) returnValue = "4";
+  else if(distance > 920) returnValue = "3";
+  else if(distance > 905) returnValue = "2";
+  else if(distance > 895) returnValue = "1";
+  else returnValue = "0";
   delay(100);
-  return to_string(returnValue)
+  return (returnValue);
 }
