@@ -2,14 +2,12 @@
 #include <Adafruit_seesaw.h>
 #include <SPI.h>
 #include <RH_RF69.h>
-#include <Comm.h>
-// #include "../common/Defs.h"
 
-// //defs for radio
-// #define RF69_FREQUENCY  900.0
-// #define RFM69_SLAVE     8
-// #define RFM69_INTERRUPT 3
-// #define RFM69_RST       4
+//defs for radio
+#define RF69_FREQUENCY  900.0
+#define RFM69_SLAVE     8
+#define RFM69_INTERRUPT 3
+#define RFM69_RST       4
 
 //defs for controller
 Adafruit_seesaw ss;
@@ -21,8 +19,9 @@ Adafruit_seesaw ss;
 uint32_t button_mask = (1 << BUTTON_RIGHT) | (1 << BUTTON_DOWN) | (1 << BUTTON_LEFT) | (1 << BUTTON_UP) | (1 << BUTTON_SEL);
 #define IRQ_PIN   5
 
+void send(RH_RF69 r, String d);
+
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
-Comm rad;
 
 void setup() {
   Serial.begin(115200);
@@ -54,22 +53,32 @@ void setup() {
 }
 
 void loop() {
-
   String d = "Jackattack";
+
   int dlen = d.length();
   char charra[dlen];
-
   for(int i=0; i<dlen; i++)
     charra[i] = d[i];
-
-  for(char c: charra)
-    Serial.println(c);
-
+  Serial.print("\nSending...");
   rf69.send((uint8_t*)charra, strlen(charra));
   rf69.waitPacketSent();
+  Serial.print("Sent: ''");
+  Serial.print(d);
+  Serial.print("''");
 
-  // Serial.print("CHECK-1\n");
-  // rad.send(rf69, "Jackattack");
-  // Serial.print("CHECK7\n");
+  // send(rf69, "Test2okay");
   delay(400);
+}
+
+void send(RH_RF69 r, String d) {
+  int dlen = d.length();
+  char charra[dlen];
+  for(int i=0; i<dlen; i++)
+    charra[i] = d[i];
+  Serial.print("\nSending...");
+  rf69.send((uint8_t*)charra, strlen(charra));
+  rf69.waitPacketSent();
+  Serial.print("Sent: ''");
+  Serial.print(d);
+  Serial.print("''");
 }
