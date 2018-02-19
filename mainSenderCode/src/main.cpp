@@ -25,7 +25,7 @@ Adafruit_DRV2605 drv;
 uint32_t button_mask = (1 << BUTTON_RIGHT) | (1 << BUTTON_DOWN) | (1 << BUTTON_LEFT) | (1 << BUTTON_UP) | (1 << BUTTON_SEL);
 #define IRQ_PIN   5
 
-void send(RH_RF69 r, String d);
+// void send(RH_RF69 r, String d);
 
 RH_RF69 rf69(RFM69_SLAVE, RFM69_INTERRUPT);
 
@@ -67,11 +67,11 @@ void setup() {
 void loop() {
   static int level;
   static uint8_t effect;
-  String lvl = "";
+  String lvl = "1";
   uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
   uint8_t len = sizeof(buf);
 
-  if (rf69.waitAvailableTimeout(500)) {
+  if (rf69.available()) {
     if (rf69.recv(buf, &len)) {
       char* temp = (char*)buf;
       String tempS(temp);
@@ -114,10 +114,10 @@ void loop() {
     pwmr += (int) (-2*(xcoord * 255)/JOYSTICK_RANGE);
   }
 
-  // Serial.print("pwml: ");
-  // Serial.println(pwml);
-  // Serial.print("pwmr: ");
-  // Serial.println(pwmr);
+  Serial.print("pwml: ");
+  Serial.println(pwml);
+  Serial.print("pwmr: ");
+  Serial.println(pwmr);
   if(level == 0)
     effect = 0;
   else if(level == 1)
@@ -137,7 +137,6 @@ void loop() {
   drv.go();
 
   String d = "";
-  Serial.println(d);
   char temp[5];
 
   itoa(xcoord, temp, 10);

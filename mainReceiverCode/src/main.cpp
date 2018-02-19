@@ -10,8 +10,8 @@
 #define RFM69_RST       4
 
 //defs for ultra
-#define ULTRA_SEND  16
-#define ULTRA_REC   15
+#define ULTRA_SEND  15
+#define ULTRA_REC   16
 
 #define rfpos A5
 #define rfneg A2
@@ -27,7 +27,7 @@
 #define pwmlf A3
 #define pwmlb A4
 
-String receive(RH_RF69 r, int timeOut);
+// String receive(RH_RF69 r, int timeOut);
 String ultra();
 void setDirection(char motor, bool direction);
 int clip(int num);
@@ -85,22 +85,25 @@ void loop() {
   uint8_t len = sizeof(buf);
 
   String coords = "";
+  Serial.print("TEST");
 
-  if (rf69.waitAvailableTimeout(500)) {
+  if (rf69.available()) {
     if (rf69.recv(buf, &len)) {
       char* temp = (char*)buf;
       String tempS(temp);
       Serial.println(tempS);
       coords = tempS;
     } else {
-      Serial.println("@");
+      // Serial.println("@");
+      coords = "@";
     }
   } else {
-    Serial.println("!");
+    // Serial.println("!");
+    coords = "!";
   }
   delay(100);
+  Serial.println(coords);
 //-32:23:
-
   // coords = "-32:23:";
 
   String pwml="", pwmr="";
@@ -118,24 +121,25 @@ void loop() {
     for(int i=nextStart; i<coords.length()-1; i++) {
       pwmr += coords[i];
     }
+
+    Serial.print("TEST");
+    Serial.println(pwml);
+    Serial.println(pwmr);
+
+    int pwmlint = pwml.toInt();
+    int pwmrint = pwmr.toInt();
+
+    setSpeed(pwmrint, pwmlint);
   }
 
-  Serial.println(pwml);
-  Serial.println(pwmr);
-
-  int pwmlint = pwml.toInt();
-  int pwmrint = pwmr.toInt();
-
-  setSpeed(pwmrint, pwmlint);
-
-  Serial.println("1");
+  Serial.print("SONIC: ");
   String d = ultra();
-  Serial.println("2");
+  Serial.println(d);
   int dlen = d.length();
   char charra[dlen];
   for(int i=0; i<dlen; i++)
     charra[i] = d[i];
-  Serial.print("\nSending...");
+  Serial.print("\nSending... ");
   rf69.send((uint8_t*)charra, strlen(charra));
   rf69.waitPacketSent();
   Serial.print("Sent: ''");
@@ -143,22 +147,22 @@ void loop() {
   Serial.print("''");
 }
 
-String receive(RH_RF69 r, int timeOut) {
-  uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
-  uint8_t len = sizeof(buf);
-  if (r.waitAvailableTimeout(timeOut)) {
-    if (r.recv(buf, &len)) {
-      char* temp = (char*)buf;
-      String tempS(temp);
-      tempS = '='+tempS;
-      return tempS;
-    } else {
-      return "@";
-    }
-  } else {
-    return "!";
-  }
-}
+// String receive(RH_RF69 r, int timeOut) {
+//   uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+//   uint8_t len = sizeof(buf);
+//   if (r.waitAvailableTimeout(timeOut)) {
+//     if (r.recv(buf, &len)) {
+//       char* temp = (char*)buf;
+//       String tempS(temp);
+//       tempS = '='+tempS;
+//       return tempS;
+//     } else {
+//       return "@";
+//     }
+//   } else {
+//     return "!";
+//   }
+// }
 
 String ultra() {
   unsigned long sendTime;
@@ -186,6 +190,8 @@ String ultra() {
   else if(distance > 895) returnValue = 1;
   else returnValue = 0;
   delay(100);
+
+  Serial.print(returnValue);
 
   char tempx[1];
   itoa(returnValue, tempx, 1);
